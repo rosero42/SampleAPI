@@ -36,7 +36,7 @@ namespace SampleAPI.Controllers
             return Ok(user);
         }
 
-        [HttpPost("{user}")]
+        [HttpPost]
         public IActionResult Create(UserItem user)
         {
             var tempUser = UserService.Get(user.UserName);
@@ -54,6 +54,12 @@ namespace SampleAPI.Controllers
                 return BadRequest(tempUser);
             UserService.Add(username);
             return CreatedAtAction(nameof(Create), new { name = username }, username);
+        }
+
+        [HttpPut]
+        public IActionResult Update(UserItem user)
+        {
+            
         }
 
 
