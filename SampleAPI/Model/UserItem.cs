@@ -4,9 +4,9 @@ namespace SampleAPI.Model
 {
     public class UserItem
     {
-        public int Id;
-        public string? UserName;
-        public ToDoService ToDo;
+        public int Id { get; set; }
+        public string? UserName { get; set; }
+        public ToDoService ToDo { get; set; }
 
         public UserItem()
         {
