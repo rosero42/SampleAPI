@@ -13,15 +13,15 @@ namespace SampleAPI.Controllers
         }
 
         // GET all
-        [HttpGet]
-        public ActionResult<List<ToDoItem>> GetAll() =>
-            ToDoService.GetAll();
+/*        [HttpGet("{user}")]
+        public ActionResult<List<ToDoItem>> GetAll(UserItem user) =>
+            user.ToDo.GetAll();
 
         // GET by id
-        [HttpGet("{id}")]
-        public ActionResult<ToDoItem> Get(int id)
+        [HttpGet("{user}/{id}")]
+        public ActionResult<ToDoItem> Get(UserItem user,int id)
         {
-            var item = ToDoService.Get(id);
+            var item = user.ToDo.Get(id);
             if(item == null)
                 return NotFound();
             return Ok(item);
@@ -31,56 +31,56 @@ namespace SampleAPI.Controllers
 
         // Get all by type
 
-        [HttpPost]
-        public IActionResult Create(ToDoItem item)
+        [HttpPost("{user}")]
+        public IActionResult Create(UserItem user, ToDoItem item)
         {
-            ToDoService.Add(item);
+            user.ToDo.Add(item);
             return CreatedAtAction(nameof(Create), new { id = item.Id }, item);
         }
 
-        [HttpPost("{name}")]
-        public IActionResult Create(string name)
+        [HttpPost("{user}/{name}")]
+        public IActionResult Create(UserItem user, string name)
         {
-            ToDoService.Add(name);
+            user.ToDo.Add(name);
             return CreatedAtAction(nameof(Create), new { name = name }, name);
         }
 
-        [HttpPost("{name}/{category}")]
-        public IActionResult Create(string name, string category)
+        [HttpPost("{user}/{name}/{category}")]
+        public IActionResult Create(UserItem user, string name, string category)
         {
-            ToDoService.Add(name, category);
+            user.ToDo.Add(name, category);
             return CreatedAtAction(nameof(Create), new { name = name }, name);
         }
-        [HttpPut("{id}/{name}")]
-        public IActionResult Update(int id, ToDoItem item)
+        [HttpPut("{user}/{id}")]
+        public IActionResult Update(UserItem user, int id, ToDoItem item)
         {
             if (id != item.Id)
                 return BadRequest();
-            var existingItem = ToDoService.Get(id);
+            var existingItem = user.ToDo.Get(id);
             if (existingItem == null)
                 return NotFound();
-            ToDoService.Update(item);
+            user.ToDo.Update(item);
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Remove(int id)
+        [HttpDelete("{user}/{id}")]
+        public IActionResult Remove(UserItem user, int id)
         {
-            var item = ToDoService.Get(id);
+            var item = user.ToDo.Get(id);
             if (item == null)
                 return NotFound();
-            ToDoService.Delete(id);
+            user.ToDo.Delete(id);
             return NoContent();
         }
 
-        [HttpDelete("{name}")]
-        public IActionResult Remove(string name)
+        [HttpDelete("{user}/{name}")]
+        public IActionResult Remove(UserItem user, string name)
         {
-            var item = ToDoService.Get(name);
+            var item = user.ToDo.Get(name);
             if (item == null)
                 return NotFound();
-            ToDoService.Delete(name);
+            user.ToDo.Delete(name);
             return NoContent();
-        }
+        }*/
     }
 }
