@@ -11,7 +11,7 @@ namespace SampleAPI.Services
             ToDoItems = new List<ToDoItem>
             {
                 new ToDoItem { Id = 1, Name = "Make a To Do List", isComplete = false, 
-                    Created = DateTime.Now.ToString("MM/dd/yyyy"), type="misc", Priority=Priority.High }
+                    Created = DateTime.Now.ToString("MM/dd/yyyy"), type="misc" }
             };
         }
 
@@ -29,14 +29,14 @@ namespace SampleAPI.Services
         public void Add(string Name)
         {
             ToDoItem item = new ToDoItem { Id=nextId++, Name=Name, isComplete=false, 
-                Created=DateTime.Now.ToString("MM/dd/yyyy"), type= "misc", Priority=Priority.Medium};
+                Created=DateTime.Now.ToString("MM/dd/yyyy"), type= "misc"};
             ToDoItems.Add(item);
         }
 
         public void Add(string Name, string category)
         {
             ToDoItem item = new ToDoItem { Id = nextId++, Name = Name, isComplete = false, 
-                Created = DateTime.Now.ToString("MM/dd/yyyy"), type =category.ToLower(), Priority = Priority.Medium };
+                Created = DateTime.Now.ToString("MM/dd/yyyy"), type =category.ToLower()};
             ToDoItems.Add(item);
         }
 
