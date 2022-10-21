@@ -27,5 +27,21 @@ namespace SampleAPI.Services
         {
              Users.Add(new UserItem {Id=nextId++,UserName=username});
         }
+
+        public static void Update(UserItem user)
+        {
+            var index = Users.FindIndex(i => i.Id == user.Id);
+            if (index == -1)
+                return;
+            Users[index] = user;
+        }
+
+        public static void Delete(string name)
+        {
+            var user = Users.FirstOrDefault(i => i.UserName == name);
+            if (user is null)
+                return;
+            Users.Remove(user);
+        }
     }
 }
