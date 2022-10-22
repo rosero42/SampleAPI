@@ -69,6 +69,16 @@ namespace SampleAPI.Controllers
             return NoContent();
         }
 
+        [HttpPut("{username}/{toDoName}/{category}")]
+        public IActionResult Update(string username, string toDoName, string category)
+        {
+            var existingUser = UserService.Get(username);
+            if (existingUser == null)
+                return NotFound();
+            existingUser.ToDo.Add(toDoName,category);
+            return NoContent();
+        }
+
         [HttpPatch("{username}")]
         public IActionResult Update(string username, ToDoItem item)
         {
