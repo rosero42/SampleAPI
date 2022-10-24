@@ -10,8 +10,8 @@ namespace SampleAPI.Services
         {
             Users = new List<UserItem>
             {
-                new UserItem {Id=1,UserName="rosero"},
-                new UserItem {Id=2, UserName="tomnaps"}
+                /*new UserItem {Id=1,UserName="rosero"},
+                new UserItem {Id=2, UserName="tomnaps"}*/
             };
         }
         public static List<UserItem> GetAll() => Users;

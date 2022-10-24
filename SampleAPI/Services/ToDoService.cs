@@ -10,8 +10,8 @@ namespace SampleAPI.Services
         {
             ToDoItems = new List<ToDoItem>
             {
-                new ToDoItem { Id = 1, Name = "Make a To Do List", isComplete = false, 
-                    Created = DateTime.Now.ToString("MM/dd/yyyy"), type="misc" }
+                /*new ToDoItem { Id = 1, Name = "Make a To Do List", isComplete = false, 
+                    Created = DateTime.Now.ToString("MM/dd/yyyy"), type="misc" }*/
             };
         }
 
