@@ -113,6 +113,16 @@ namespace SampleAPI.Controllers
             return NoContent();
         }
 
+        [HttpDelete("{username}/{toDoId}")]
+        public IActionResult Remove(string username, int toDoId)
+        {
+            var user = UserService.Get(username);
+            if (user == null)
+                return NotFound();
+            user.ToDo.Delete(toDoId);
+            return NoContent();
+        }
+
 
 
     }
