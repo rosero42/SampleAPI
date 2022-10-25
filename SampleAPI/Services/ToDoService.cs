@@ -5,7 +5,7 @@ namespace SampleAPI.Services
     public class ToDoService
     {
         public List<ToDoItem> ToDoItems { get; }
-        int nextId = 2;
+        int nextId = 1;
         public ToDoService()
         {
             ToDoItems = new List<ToDoItem>
