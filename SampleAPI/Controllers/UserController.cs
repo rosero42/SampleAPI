@@ -79,13 +79,13 @@ namespace SampleAPI.Controllers
             UserItem user = new UserItem();
             user.Id = Convert.ToInt32(dt[index]["UserID"]);
             user.UserName = Convert.ToString(dt[index]["UserName"]);
-            SqlDataAdapter tododa = new SqlDataAdapter($"SELECT * From ToDoItems WHERE userName = {user.UserName}", _connection);
+            SqlDataAdapter tododa = new SqlDataAdapter($"SELECT * From ToDoItems WHERE userName = '{user.UserName}'", _connection);
             DataTable tododt = new DataTable();
             tododa.Fill(tododt);
             for (int j = 0; j < tododt.Rows.Count; j++)
             {
                 ToDoItem item = new ToDoItem();
-                item.Id = Convert.ToInt32(tododt.Rows[j]["ItemListID"]);
+                item.Id = Convert.ToInt32(tododt.Rows[j]["ListID"]);
                 item.Name = Convert.ToString(tododt.Rows[j]["ItemName"]);
                 item.type = Convert.ToString(tododt.Rows[j]["ItemCategory"]);
                 item.Created = Convert.ToString(tododt.Rows[j]["ItemCreated"]);
@@ -119,7 +119,7 @@ namespace SampleAPI.Controllers
                 var userToDo = user.ToDo.GetAll();
                 foreach (ToDoItem item in userToDo)
                 {
-                    SqlCommand todoCommand = new SqlCommand($"Insert into ToDoItems values ({item.Id}, '{item.Name}', '{item.type}', '{item.Created}', 0, {user.UserName})", _connection);
+                    SqlCommand todoCommand = new SqlCommand($"Insert into ToDoItems values ({item.Id}, '{item.Name}', '{item.type}', '{item.Created}', 0, '{user.UserName}')", _connection);
                     int j = todoCommand.ExecuteNonQuery();
                     if (j == 0)
                         return BadRequest();
@@ -133,11 +133,37 @@ namespace SampleAPI.Controllers
         [HttpPost("{username}")]
         public IActionResult Create(string username)
         {
-            var tempUser = UserService.Get(username);
+            /*var tempUser = UserService.Get(username);
             if (tempUser != null)
                 return BadRequest(tempUser);
             UserService.Add(username);
-            return CreatedAtAction(nameof(Create), new { name = username }, username);
+            return CreatedAtAction(nameof(Create), new { name = username }, username);*/
+            _connection = new SqlConnection(_configuration.GetConnectionString("UserAppCon").ToString());
+            SqlDataAdapter userda = new SqlDataAdapter($"SELECT * From Users WHERE UserName = '{username}'", _connection);
+            DataTable userdt = new DataTable();
+            userda.Fill(userdt);
+            if (userdt.Rows.Count != 0)
+                return BadRequest();
+            _connection.Open();
+            SqlCommand cmd = new SqlCommand($"Insert into Users values ('{username}')", _connection);
+            int i = cmd.ExecuteNonQuery();
+            if (i > 0)
+            {
+                //Get UserID
+                UserItem user = new UserItem();
+                user.UserName = username;
+                user.ToDo.Add("Make a To Do List", "misc");
+                var userToDo = user.ToDo.GetAll();
+                foreach (ToDoItem item in userToDo)
+                {
+                    SqlCommand todoCommand = new SqlCommand($"Insert into ToDoItems values ({item.Id}, '{item.Name}', '{item.type}', '{item.Created}', 0, '{user.UserName}')", _connection);
+                    int j = todoCommand.ExecuteNonQuery();
+                    if (j == 0)
+                        return BadRequest();
+                }
+                return CreatedAtAction(nameof(Create), new { name = user.UserName }, user);
+            }
+            return BadRequest();
         }
 
         [HttpPut("{username}")]
@@ -155,11 +181,22 @@ namespace SampleAPI.Controllers
         [HttpPut("{username}/{toDoName}/{category}")]
         public IActionResult Update(string username, string toDoName, string category)
         {
-            var existingUser = UserService.Get(username);
+            /*var existingUser = UserService.Get(username);
             if (existingUser == null)
                 return NotFound();
             existingUser.ToDo.Add(toDoName,category);
-            return NoContent();
+            return NoContent();*/
+            _connection = new SqlConnection(_configuration.GetConnectionString("UserAppCon").ToString());
+            SqlDataAdapter userda = new SqlDataAdapter($"SELECT * From Users WHERE UserName = '{username}'", _connection);
+            DataTable userdt = new DataTable();
+            userda.Fill(userdt);
+            if (userdt.Rows.Count == 0)
+                return NotFound();
+            //Get List number
+            SqlDataAdapter toDoAdapter = new SqlDataAdapter($"SELECT * From ToDoItems WHERE userName = '{username}'", _connection);
+            DataTable toDo = new DataTable();
+            toDoAdapter.Fill(toDo);
+            SqlCommand cmd = new SqlCommand($"Insert into ToDoItems values ({toDo.Rows.Count+1}, '{toDoName}', '{category}', '{DateTime.Now.ToString("MM/dd/yyyy")}', 0, '{username}')", _connection);
         }
 
         [HttpPatch("{username}")]
