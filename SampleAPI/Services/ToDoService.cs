@@ -5,13 +5,13 @@ namespace SampleAPI.Services
     public class ToDoService
     {
         public List<ToDoItem> ToDoItems { get; }
-        int nextId = 2;
+        int nextId = 1;
         public ToDoService()
         {
             ToDoItems = new List<ToDoItem>
             {
-                new ToDoItem { Id = 1, Name = "Make a To Do List", isComplete = false, 
-                    Created = DateTime.Now.ToString("MM/dd/yyyy"), type="misc" }
+                /*new ToDoItem { Id = 1, Name = "Make a To Do List", isComplete = false, 
+                    Created = DateTime.Now.ToString("MM/dd/yyyy"), type="misc" }*/
             };
         }
 
@@ -20,8 +20,6 @@ namespace SampleAPI.Services
         public  ToDoItem? Get(string name)=> ToDoItems.FirstOrDefault(i => i.Name == name);
         public void Add(ToDoItem toDoItem)
         {
-            toDoItem.Id = nextId++;
-            toDoItem.Created = DateTime.Now.ToString("MM/dd/yyyy");
             toDoItem.type = toDoItem.type.ToLower();
             ToDoItems.Add(toDoItem);
         }
