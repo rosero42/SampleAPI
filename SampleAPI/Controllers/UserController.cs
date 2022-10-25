@@ -42,16 +42,6 @@ namespace SampleAPI.Controllers
            
 
 
-        // Get by id
-        /*[HttpGet("{id}")]
-        public ActionResult<UserItem> Get(int id)
-        {
-            var user = UserService.Get(id);
-            if (user == null)
-                return NotFound();
-            return Ok(user);
-        }*/
-
 
         [HttpGet("{username}")]
         public ActionResult<UserItem> Get(string username)
@@ -110,18 +100,21 @@ namespace SampleAPI.Controllers
             if (userdt.Rows.Count != 0)
                 return BadRequest();
             _connection.Open();
-            SqlCommand cmd = new SqlCommand($"Insert into Users values ('{user.UserName}')",_connection);
+            SqlCommand cmd = new SqlCommand($"Insert into Users values ('{user.UserName}', {user.ToDo.GetAll().Count+1})",_connection);
             int i = cmd.ExecuteNonQuery();
             if (i > 0)
             {
                 //Get UserID
                 user.ToDo.Add("Make a To Do List", "misc");
                 var userToDo = user.ToDo.GetAll();
-                foreach (ToDoItem item in userToDo)
+                int id = 1;
+                for (int j = 0; j < userToDo.Count;j++)
                 {
-                    SqlCommand todoCommand = new SqlCommand($"Insert into ToDoItems values ({item.Id}, '{item.Name}', '{item.type}', '{item.Created}', 0, '{user.UserName}')", _connection);
-                    int j = todoCommand.ExecuteNonQuery();
-                    if (j == 0)
+                    SqlCommand todoCommand = new SqlCommand($"Insert into ToDoItems values ({id++}, " +
+                        $"'{userToDo[i].Name}', '{userToDo[i].type}', '{DateTime.Now.ToString("MM/dd/yyyy")}', " +
+                        $"0, '{user.UserName}')", _connection);
+                    int k = todoCommand.ExecuteNonQuery();
+                    if (k == 0)
                         return BadRequest();
                 }
                 return CreatedAtAction(nameof(Create), new { name = user.UserName }, user);
@@ -145,18 +138,19 @@ namespace SampleAPI.Controllers
             if (userdt.Rows.Count != 0)
                 return BadRequest();
             _connection.Open();
-            SqlCommand cmd = new SqlCommand($"Insert into Users values ('{username}')", _connection);
+            SqlCommand cmd = new SqlCommand($"Insert into Users values ('{username}', 1)", _connection);
             int i = cmd.ExecuteNonQuery();
             if (i > 0)
             {
                 //Get UserID
                 UserItem user = new UserItem();
                 user.UserName = username;
-                user.ToDo.Add("Make a To Do List", "misc");
+                user.ToDo.Add("Make To Do List", "misc");
                 var userToDo = user.ToDo.GetAll();
                 foreach (ToDoItem item in userToDo)
                 {
-                    SqlCommand todoCommand = new SqlCommand($"Insert into ToDoItems values ({item.Id}, '{item.Name}', '{item.type}', '{item.Created}', 0, '{user.UserName}')", _connection);
+                    SqlCommand todoCommand = new SqlCommand($"Insert into ToDoItems values (1, " +
+                        $"'{item.Name}', '{item.type}', '{item.Created}', 0, '{user.UserName}')", _connection);
                     int j = todoCommand.ExecuteNonQuery();
                     if (j == 0)
                         return BadRequest();
@@ -166,17 +160,6 @@ namespace SampleAPI.Controllers
             return BadRequest();
         }
 
-        [HttpPut("{username}")]
-        public IActionResult Update(UserItem user, string username)
-        {
-            if (username != user.UserName)
-                return BadRequest();
-            var existingUser = UserService.Get(username);
-            if (existingUser == null)
-                return NotFound();
-            UserService.Update(user);
-            return NoContent();
-        }
 
         [HttpPut("{username}/{toDoName}/{category}")]
         public IActionResult Update(string username, string toDoName, string category)
@@ -193,37 +176,53 @@ namespace SampleAPI.Controllers
             if (userdt.Rows.Count == 0)
                 return NotFound();
             //Get List number
+            int listNum = Convert.ToInt32(userdt.Rows[0]["TotalListCount"]);
             SqlDataAdapter toDoAdapter = new SqlDataAdapter($"SELECT * From ToDoItems WHERE userName = '{username}'", _connection);
             DataTable toDo = new DataTable();
             toDoAdapter.Fill(toDo);
             _connection.Open();
-            SqlCommand cmd = new SqlCommand($"Insert into ToDoItems values ({toDo.Rows.Count+1}, '{toDoName}', '{category}', '{DateTime.Now.ToString("MM/dd/yyyy")}', 0, '{username}')", _connection);
+            SqlCommand cmd = new SqlCommand($"Insert into ToDoItems values ({++listNum}, " +
+                $"'{toDoName}', '{category}', '{DateTime.Now.ToString("MM/dd/yyyy")}', 0, '{username}')", _connection);
             int i = cmd.ExecuteNonQuery();
             if(i == 0)
                 return BadRequest();
+            //Update number of list count
+            SqlCommand updateNumCmd = new SqlCommand($"Alter table Users set TotalListCount = {listNum} where UserName = '{username}'");
             return NoContent();
         }
 
-        [HttpPatch("{username}")]
+        [HttpPut("{username}")]
         public IActionResult Update(string username, ToDoItem item)
         {
-            var user = UserService.Get(username);
-            if (user == null)
+ 
+            _connection = new SqlConnection(_configuration.GetConnectionString("UserAppCon").ToString());
+            SqlDataAdapter userda = new SqlDataAdapter($"SELECT * From Users WHERE UserName = '{username}'", _connection);
+            DataTable userdt = new DataTable();
+            userda.Fill(userdt);
+            if (userdt.Rows.Count == 0)
+                return NotFound();
+            //Get List number
+            int listNum = Convert.ToInt32(userdt.Rows[0]["TotalListCount"]);
+            
+            _connection.Open();
+            SqlCommand cmd = new SqlCommand($"Insert into ToDoItems values ({++listNum}, " +
+                $"'{item.Name}', '{item.type}', '{DateTime.Now.ToString("MM/dd/yyyy")}', 0, '{username}')", _connection);
+            int i = cmd.ExecuteNonQuery();
+            if (i == 0)
                 return BadRequest();
-            user.ToDo.Add(item);
             return NoContent();
+
         }
         [HttpPatch("{username}/{Id}/{isComplete}")]
         public IActionResult Update(string username, int Id, bool isComplete)
         {
-            var user = UserService.Get(username);
-            if (user == null)
-                return BadRequest();
-            var item = user.ToDo.Get(Id);
-            if (item == null)
-                return BadRequest();
-            item.isComplete = isComplete;
-            user.ToDo.Update(item);
+            _connection = new SqlConnection(_configuration.GetConnectionString("UserAppCon").ToString());
+            int complete = isComplete? 1 : 0;
+            SqlCommand cmd = new SqlCommand($"update ToDoItems set isComplete = {complete} " +
+                $"where userName = '{username}' and ListID = '{Id}'", _connection);
+            _connection.Open();
+            int i = cmd.ExecuteNonQuery();
+            if(i==0) return NotFound();
             return NoContent();
         }
         
@@ -231,20 +230,30 @@ namespace SampleAPI.Controllers
         [HttpDelete("{name}")]
         public IActionResult Remove(string name)
         {
-            var user = UserService.Get(name);
-            if (user == null)
-                return NotFound();
-            UserService.Delete(name);
+            _connection = new SqlConnection(_configuration.GetConnectionString("UserAppCon").ToString());
+ 
+            //Remove to do items from todoitem table
+            SqlCommand todoCmd = new SqlCommand($"delete from ToDoItems where userName = '{name}'",_connection);
+            _connection.Open();
+            int i = todoCmd.ExecuteNonQuery();
+
+
+            //Remove user from user table
+            SqlCommand userCmd = new SqlCommand($"delete from Users where UserName = '{name}'", _connection);
+            int j = userCmd.ExecuteNonQuery();
+            if(j==0) return NotFound();
             return NoContent();
+            
         }
 
         [HttpDelete("{username}/{toDoId}")]
         public IActionResult Remove(string username, int toDoId)
         {
-            var user = UserService.Get(username);
-            if (user == null)
-                return NotFound();
-            user.ToDo.Delete(toDoId);
+            _connection = new SqlConnection(_configuration.GetConnectionString("UserAppCon").ToString());
+            SqlCommand cmd = new SqlCommand($"delete from ToDoItems where userName = '{username}' and ListID = {toDoId}", _connection);
+            _connection.Open();
+            int i = cmd.ExecuteNonQuery();
+            if(i == 0) return NotFound();
             return NoContent();
         }
 

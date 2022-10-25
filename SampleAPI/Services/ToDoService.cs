@@ -20,8 +20,6 @@ namespace SampleAPI.Services
         public  ToDoItem? Get(string name)=> ToDoItems.FirstOrDefault(i => i.Name == name);
         public void Add(ToDoItem toDoItem)
         {
-            toDoItem.Id = nextId++;
-            toDoItem.Created = DateTime.Now.ToString("MM/dd/yyyy");
             toDoItem.type = toDoItem.type.ToLower();
             ToDoItems.Add(toDoItem);
         }
