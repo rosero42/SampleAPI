@@ -111,7 +111,7 @@ namespace SampleAPI.Controllers
                 for (int j = 0; j < userToDo.Count;j++)
                 {
                     SqlCommand todoCommand = new SqlCommand($"Insert into ToDoItems values ({id++}, " +
-                        $"'{userToDo[i].Name}', '{userToDo[i].type}', '{DateTime.Now.ToString("MM/dd/yyyy")}', " +
+                        $"'{userToDo[j].Name}', '{userToDo[j].type}', '{DateTime.Now.ToString("MM/dd/yyyy")}', " +
                         $"0, '{user.UserName}')", _connection);
                     int k = todoCommand.ExecuteNonQuery();
                     if (k == 0)
@@ -187,7 +187,10 @@ namespace SampleAPI.Controllers
             if(i == 0)
                 return BadRequest();
             //Update number of list count
-            SqlCommand updateNumCmd = new SqlCommand($"Alter table Users set TotalListCount = {listNum} where UserName = '{username}'");
+            SqlCommand updateNumCmd = new SqlCommand($"update Users set TotalListCount = {listNum} where UserName = '{username}'", _connection);
+            int j = updateNumCmd.ExecuteNonQuery();
+            if (j == 0)
+                return BadRequest();
             return NoContent();
         }
 
@@ -209,6 +212,11 @@ namespace SampleAPI.Controllers
                 $"'{item.Name}', '{item.type}', '{DateTime.Now.ToString("MM/dd/yyyy")}', 0, '{username}')", _connection);
             int i = cmd.ExecuteNonQuery();
             if (i == 0)
+                return BadRequest();
+            //UPdate list num
+            SqlCommand listcommand = new SqlCommand($"update Users set TotalListCount = {listNum} where UserName = '{username}'",_connection);
+            int j = listcommand.ExecuteNonQuery();
+            if (j == 0)
                 return BadRequest();
             return NoContent();
 
