@@ -196,7 +196,12 @@ namespace SampleAPI.Controllers
             SqlDataAdapter toDoAdapter = new SqlDataAdapter($"SELECT * From ToDoItems WHERE userName = '{username}'", _connection);
             DataTable toDo = new DataTable();
             toDoAdapter.Fill(toDo);
+            _connection.Open();
             SqlCommand cmd = new SqlCommand($"Insert into ToDoItems values ({toDo.Rows.Count+1}, '{toDoName}', '{category}', '{DateTime.Now.ToString("MM/dd/yyyy")}', 0, '{username}')", _connection);
+            int i = cmd.ExecuteNonQuery();
+            if(i == 0)
+                return BadRequest();
+            return NoContent();
         }
 
         [HttpPatch("{username}")]
