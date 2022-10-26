@@ -46,10 +46,6 @@ namespace SampleAPI.Controllers
         [HttpGet("{username}")]
         public ActionResult<UserItem> Get(string username)
         {
-            /*var user = UserService.Get(username);
-            if (user == null)
-                return NotFound();
-            return Ok(user);*/
             _connection = new SqlConnection(_configuration.GetConnectionString("UserAppCon").ToString());
             SqlDataAdapter userda = new SqlDataAdapter($"SELECT * From Users WHERE UserName = '{username}'", _connection);
             DataTable userdt = new DataTable();
@@ -88,11 +84,6 @@ namespace SampleAPI.Controllers
         [HttpPost]
         public IActionResult Create(UserItem user)
         {
-            /*var tempUser = UserService.Get(user.UserName);
-            if (tempUser != null)
-                return BadRequest();
-            UserService.Add(user);
-            return CreatedAtAction(nameof(Create), new { name = user.UserName }, user);*/
             _connection = new SqlConnection(_configuration.GetConnectionString("UserAppCon").ToString());
             SqlDataAdapter userda = new SqlDataAdapter($"SELECT * From Users WHERE UserName = '{user.UserName}'", _connection);
             DataTable userdt = new DataTable();
@@ -126,11 +117,6 @@ namespace SampleAPI.Controllers
         [HttpPost("{username}")]
         public IActionResult Create(string username)
         {
-            /*var tempUser = UserService.Get(username);
-            if (tempUser != null)
-                return BadRequest(tempUser);
-            UserService.Add(username);
-            return CreatedAtAction(nameof(Create), new { name = username }, username);*/
             _connection = new SqlConnection(_configuration.GetConnectionString("UserAppCon").ToString());
             SqlDataAdapter userda = new SqlDataAdapter($"SELECT * From Users WHERE UserName = '{username}'", _connection);
             DataTable userdt = new DataTable();
@@ -164,11 +150,6 @@ namespace SampleAPI.Controllers
         [HttpPut("{username}/{toDoName}/{category}")]
         public IActionResult Update(string username, string toDoName, string category)
         {
-            /*var existingUser = UserService.Get(username);
-            if (existingUser == null)
-                return NotFound();
-            existingUser.ToDo.Add(toDoName,category);
-            return NoContent();*/
             _connection = new SqlConnection(_configuration.GetConnectionString("UserAppCon").ToString());
             SqlDataAdapter userda = new SqlDataAdapter($"SELECT * From Users WHERE UserName = '{username}'", _connection);
             DataTable userdt = new DataTable();
